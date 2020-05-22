@@ -240,6 +240,10 @@ public class GiteaSCMSource extends AbstractGitSCMSource {
                 GiteaPullRequest pr =
                         c.fetchPullRequest(repoOwner, repository, Long.parseLong(h.getId()));
                 if (pr.getState() == GiteaIssueState.OPEN) {
+                    if(pr.getTitle().startsWith("WIP:")){
+                        listener.getLogger().format("Pull request #%s is WIP%n", h.getId());
+                        return null;
+                    }
                     listener.getLogger().format("Current revision of pull request #%s is %s%n",
                             h.getId(), pr.getHead().getSha());
                     return new PullRequestSCMRevision(
@@ -335,6 +339,10 @@ public class GiteaSCMSource extends AbstractGitSCMSource {
                     listener.getLogger().format("%n  Checking pull requests...%n");
                     for (final GiteaPullRequest p : request.getPullRequests()) {
                         if (p == null) {
+                            continue;
+                        }
+                        if(p.getTitle().startsWith("WIP")){
+                            listener.getLogger().format("PR %d is WIP -> continue", p.getId());
                             continue;
                         }
                         count++;
